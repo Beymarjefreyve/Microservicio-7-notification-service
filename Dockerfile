@@ -7,12 +7,11 @@ COPY src ./src
 RUN mvn package -DskipTests
 
 # Stage 2: Run the application
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Render expects the app to listen on the port defined by the PORT environment variable
-# We can pass it to Spring Boot via SERVER_PORT
+# Render lo sobreescribirá con la variable PORT, pero mantenemos SERVER_PORT por consistencia
 ENV SERVER_PORT=8007
 
 EXPOSE 8007
