@@ -24,16 +24,16 @@ public class NotificationService {
     private final RestTemplate restTemplate;
     private final TemplateEngine templateEngine;
 
-    @Value("${mailersend.api.url}")
+    @Value("${brevo.api.url}")
     private String apiUrl;
 
-    @Value("${mailersend.api.token}")
-    private String apiToken;
+    @Value("${brevo.api.key}")
+    private String apiKey;
 
-    @Value("${mailersend.from.email}")
+    @Value("${brevo.from.email}")
     private String fromEmail;
 
-    @Value("${mailersend.from.name}")
+    @Value("${brevo.from.name}")
     private String fromName;
 
     public NotificationService(RestTemplate restTemplate, TemplateEngine templateEngine) {
@@ -42,7 +42,7 @@ public class NotificationService {
     }
 
     public void sendEmail(NotificationRequest request) {
-        logger.info("Sending {} email to {} via MailerSend API", request.getType(), request.getTo());
+        logger.info("Sending {} email to {} via Brevo API", request.getType(), request.getTo());
 
         // 1. Procesar Template HTML
         Context context = new Context();
@@ -50,26 +50,26 @@ public class NotificationService {
         context.setVariable("body", request.getBody());
         String htmlContent = templateEngine.process(getTemplateName(request.getType()), context);
 
-        // 2. Construir JSON para MailerSend
+        // 2. Construir JSON para Brevo
         Map<String, Object> body = new HashMap<>();
-        body.put("from", Map.of("email", fromEmail, "name", fromName));
+        body.put("sender", Map.of("email", fromEmail, "name", fromName));
         body.put("to", Collections.singletonList(Map.of("email", request.getTo())));
         body.put("subject", request.getSubject());
-        body.put("html", htmlContent);
+        body.put("htmlContent", htmlContent);
 
-        // 3. Headers con el Token Bearer
+        // 3. Headers con la API Key de Brevo
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiToken);
+        headers.set("api-key", apiKey);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         // 4. Enviar
         try {
             restTemplate.postForEntity(apiUrl, entity, String.class);
-            logger.info("Email sent successfully via API");
+            logger.info("Email sent successfully via Brevo API");
         } catch (Exception e) {
-            logger.error("Failed to send email via API: {}", e.getMessage());
+            logger.error("Failed to send email via Brevo API: {}", e.getMessage());
             throw new RuntimeException("Error enviando email: " + e.getMessage());
         }
     }
