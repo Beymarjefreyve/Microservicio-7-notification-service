@@ -27,7 +27,8 @@ public class NotificationController {
     }
 
     @PostMapping("/send-password-reset")
-    public ResponseEntity<String> sendPasswordReset(@RequestBody NotificationRequest request) throws MessagingException {
+    public ResponseEntity<String> sendPasswordReset(@RequestBody NotificationRequest request)
+            throws MessagingException {
         request.setType("PASSWORD_RESET");
         notificationService.sendEmail(request);
         return ResponseEntity.ok("Password reset email sent");

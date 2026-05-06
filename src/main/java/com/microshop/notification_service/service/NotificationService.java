@@ -37,7 +37,7 @@ public class NotificationService {
         Context context = new Context();
         context.setVariable("subject", request.getSubject());
         context.setVariable("body", request.getBody());
-        
+
         String templateName = getTemplateName(request.getType());
         String htmlContent = templateEngine.process(templateName, context);
 
@@ -51,7 +51,8 @@ public class NotificationService {
     }
 
     private String getTemplateName(String type) {
-        if (type == null) return "generic-email";
+        if (type == null)
+            return "generic-email";
         return switch (type.toUpperCase()) {
             case "VERIFICATION" -> "verification-email";
             case "PASSWORD_RESET" -> "password-reset-email";
