@@ -20,7 +20,7 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.from}")
     private String fromEmail;
 
     public NotificationService(JavaMailSender mailSender, TemplateEngine templateEngine) {
@@ -37,7 +37,7 @@ public class NotificationService {
         Context context = new Context();
         context.setVariable("subject", request.getSubject());
         context.setVariable("body", request.getBody());
-
+        
         String templateName = getTemplateName(request.getType());
         String htmlContent = templateEngine.process(templateName, context);
 
@@ -47,12 +47,11 @@ public class NotificationService {
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
-        logger.info("Email sent successfully");
+        logger.info("Email sent successfully via MailerSend SMTP");
     }
 
     private String getTemplateName(String type) {
-        if (type == null)
-            return "generic-email";
+        if (type == null) return "generic-email";
         return switch (type.toUpperCase()) {
             case "VERIFICATION" -> "verification-email";
             case "PASSWORD_RESET" -> "password-reset-email";
