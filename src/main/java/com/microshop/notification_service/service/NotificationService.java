@@ -1,53 +1,77 @@
 package com.microshop.notification_service.service;
 
 import com.microshop.notification_service.dto.NotificationRequest;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class NotificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
-    private final JavaMailSender mailSender;
+    private final RestTemplate restTemplate;
     private final TemplateEngine templateEngine;
 
-    @Value("${spring.mail.from}")
+    @Value("${mailersend.api.url}")
+    private String apiUrl;
+
+    @Value("${mailersend.api.token}")
+    private String apiToken;
+
+    @Value("${mailersend.from.email}")
     private String fromEmail;
 
-    public NotificationService(JavaMailSender mailSender, TemplateEngine templateEngine) {
-        this.mailSender = mailSender;
+    @Value("${mailersend.from.name}")
+    private String fromName;
+
+    public NotificationService(RestTemplate restTemplate, TemplateEngine templateEngine) {
+        this.restTemplate = restTemplate;
         this.templateEngine = templateEngine;
     }
 
-    public void sendEmail(NotificationRequest request) throws MessagingException {
-        logger.info("Sending {} email to {}", request.getType(), request.getTo());
+    public void sendEmail(NotificationRequest request) {
+        logger.info("Sending {} email to {} via MailerSend API", request.getType(), request.getTo());
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
+        // 1. Procesar Template HTML
         Context context = new Context();
         context.setVariable("subject", request.getSubject());
         context.setVariable("body", request.getBody());
-        
-        String templateName = getTemplateName(request.getType());
-        String htmlContent = templateEngine.process(templateName, context);
+        String htmlContent = templateEngine.process(getTemplateName(request.getType()), context);
 
-        helper.setFrom(fromEmail);
-        helper.setTo(request.getTo());
-        helper.setSubject(request.getSubject());
-        helper.setText(htmlContent, true);
+        // 2. Construir JSON para MailerSend
+        Map<String, Object> body = new HashMap<>();
+        body.put("from", Map.of("email", fromEmail, "name", fromName));
+        body.put("to", Collections.singletonList(Map.of("email", request.getTo())));
+        body.put("subject", request.getSubject());
+        body.put("html", htmlContent);
 
-        mailSender.send(message);
-        logger.info("Email sent successfully via MailerSend SMTP");
+        // 3. Headers con el Token Bearer
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiToken);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        // 4. Enviar
+        try {
+            restTemplate.postForEntity(apiUrl, entity, String.class);
+            logger.info("Email sent successfully via API");
+        } catch (Exception e) {
+            logger.error("Failed to send email via API: {}", e.getMessage());
+            throw new RuntimeException("Error enviando email: " + e.getMessage());
+        }
     }
 
     private String getTemplateName(String type) {
