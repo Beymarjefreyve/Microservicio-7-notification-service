@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.thymeleaf.TemplateEngine;
@@ -66,8 +67,8 @@ public class NotificationService {
 
         // 4. Enviar
         try {
-            restTemplate.postForEntity(apiUrl, entity, String.class);
-            logger.info("Email sent successfully via Brevo API");
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
+            logger.info("Email sent successfully via Brevo API. Response: {}", response.getBody());
         } catch (Exception e) {
             logger.error("Failed to send email via Brevo API: {}", e.getMessage());
             throw new RuntimeException("Error enviando email: " + e.getMessage());
