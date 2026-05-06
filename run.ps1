@@ -7,4 +7,13 @@ if (-not (Test-Path "pom.xml")) {
     exit
 }
 
+# Cargar variables de entorno desde .env si existe
+if (Test-Path ".env") {
+    Write-Host "Cargando variables desde .env..." -ForegroundColor Yellow
+    Get-Content .env | Where-Object { $_ -match "=" -and $_ -notmatch "^#" } | ForEach-Object {
+        $name, $value = $_.Split('=', 2)
+        [System.Environment]::SetEnvironmentVariable($name, $value, [System.EnvironmentVariableTarget]::Process)
+    }
+}
+
 mvn spring-boot:run
