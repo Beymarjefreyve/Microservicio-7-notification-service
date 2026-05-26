@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .header { background: linear-gradient(135deg, #10b981 0%, #047857 100%); padding: 30px; text-align: center; color: white; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
+        .content { padding: 40px; color: #1f2937; line-height: 1.6; }
+        .content h2 { margin-top: 0; font-size: 20px; color: #111827; }
+        .otp-box { background-color: #f0fdf4; border: 2px dashed #10b981; border-radius: 10px; padding: 24px; text-align: center; margin: 24px 0; }
+        .otp-code { font-size: 42px; font-weight: 800; letter-spacing: 12px; color: #047857; margin: 0; }
+        .warning { background-color: #fff7ed; border-left: 4px solid #f97316; padding: 12px 16px; border-radius: 4px; font-size: 13px; color: #9a3412; margin-top: 24px; }
+        .footer { background-color: #f9fafb; padding: 20px; text-align: center; color: #6b7280; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MicroShop</h1>
+        </div>
+        <div class="content">
+            <h2 th:text="${subject}">Confirmación de Pago</h2>
+            <p>¡Hola! Recibimos una solicitud de pago en tu cuenta.</p>
+            <p th:utext="${body}">Usa el siguiente código para confirmar tu pago:</p>
+            <div class="warning">
+                <strong>⚠️ Seguridad:</strong> Nunca compartas este código con nadie. MicroShop jamás te lo pedirá por teléfono o chat.
+            </div>
+        </div>
+        <div class="footer">
+            <p>Si no solicitaste este pago, ignora este mensaje.</p>
+            <p>&copy; 2026 MicroShop. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

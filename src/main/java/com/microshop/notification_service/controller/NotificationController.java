@@ -38,4 +38,11 @@ public class NotificationController {
         notificationService.sendEmail(request);
         return ResponseEntity.ok("Order status email sent");
     }
+
+    @PostMapping("/send-payment-otp")
+    public ResponseEntity<String> sendPaymentOtp(@RequestBody NotificationRequest request) {
+        request.setType("PAYMENT_OTP");
+        notificationService.sendEmail(request);
+        return ResponseEntity.ok("Payment OTP email sent");
+    }
 }

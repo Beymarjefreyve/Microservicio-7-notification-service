@@ -81,6 +81,7 @@ public class NotificationService {
             case "VERIFICATION" -> "verification-email";
             case "PASSWORD_RESET" -> "password-reset-email";
             case "ORDER_STATUS" -> "order-status-email";
+            case "PAYMENT_OTP" -> "payment-otp-email";
             default -> "generic-email";
         };
     }
